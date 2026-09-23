@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 <script>
   (function(){try{var t=localStorage.getItem('bw-theme');if(!t){t='day';}document.documentElement.dataset.theme=t;}catch(e){}})();
 </script>
@@ -55,6 +55,10 @@
   </nav>
 
   <div class="header__right">
+    <button class="sound mono" id="soundBtn" type="button" aria-pressed="false" aria-label="Звук мастерской">
+      <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="sound__lbl">звук: выкл</span>
+    </button>
     <button class="toggle" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Переключить день и ночь">
       <span class="toggle__track">
         <span class="toggle__icon toggle__icon--sun" aria-hidden="true">
@@ -514,10 +518,6 @@
   <div class="footer__row">
     <span class="footer__logo">BAGAVAWOODS</span>
     <span class="mono">2026 © все права защищены</span>
-    <button class="sound mono" id="soundBtn" type="button" aria-pressed="false">
-      <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span class="sound__lbl">звук мастерской: выкл</span>
-    </button>
     <span class="mono footer__tag">ручная работа. честные материалы. живые формы.</span>
   </div>
 </footer>
@@ -547,6 +547,6 @@
   </div>
 </div>
 
-<script src="main.js?v=15"></script>
+<script src="main.js?v=17"></script>
 </body>
 </html>

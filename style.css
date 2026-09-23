@@ -660,8 +660,8 @@ html.is-loading, html.is-locked { overflow: hidden; }
 :root[data-theme="night"] .voice { color: var(--accent); border-color: var(--accent); }
 .hero__note { padding-bottom: 64px !important; }
 
-.toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 16px); z-index: 90; display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bg); color: var(--ink); border: var(--lw) solid var(--line); box-shadow: 4px 4px 0 var(--line); opacity: 0; transition: opacity .35s var(--ease), transform .35s var(--ease); max-width: calc(100vw - 32px); }
-.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.toast { position: fixed; right: 22px; bottom: 22px; transform: translate(0, 16px); z-index: 90; display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bg); color: var(--ink); border: var(--lw) solid var(--line); box-shadow: 4px 4px 0 var(--line); opacity: 0; transition: opacity .35s var(--ease), transform .35s var(--ease); max-width: calc(100vw - 32px); }
+.toast.is-on { opacity: 1; transform: translate(0, 0); }
 .toast .hand { font-size: 1.2rem; }
 .toast__btn { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; padding: 6px 10px; border: 1px solid var(--line); }
 .toast__btn[data-yes] { background: var(--accent); color: var(--accent-ink); }
@@ -727,7 +727,9 @@ html.is-loading, html.is-locked { overflow: hidden; }
 /* =========================================================
    ЗВУК МАСТЕРСКОЙ, ОТКУДА ДЕРЕВО
    ========================================================= */
-.sound { display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--line-soft); color: var(--ink-2); transition: border-color .3s, color .3s; }
+.sound { display: inline-flex; align-items: center; gap: 10px; height: 38px; padding: 0 12px; border: var(--lw) solid var(--line); color: var(--ink); background: var(--bg); transition: box-shadow .3s var(--ease), transform .3s var(--ease); }
+.sound:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--line); }
+@media (max-width: 900px) { .sound { padding: 0 10px; } .sound__lbl { display: none; } }
 .sound:hover { border-color: var(--line); color: var(--ink); }
 .sound__bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
 .sound__bars i { width: 2px; height: 25%; background: currentColor; }
