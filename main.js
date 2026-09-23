@@ -8,6 +8,7 @@
   const PRODUCTS = [
     {
       id: 'table',
+      draw: 'img/draw-table.webp',
       line: 'Живая форма. Натуральный характер.',
       cat: 'Столы',
       num: '01',
@@ -24,6 +25,7 @@
     },
     {
       id: 'tv',
+      draw: 'img/draw-tv.webp',
       line: 'Функциональность. Чистые линии.',
       cat: 'Мебель',
       num: '02',
@@ -39,6 +41,7 @@
     },
     {
       id: 'lamp',
+      draw: 'img/draw-lamp.webp',
       line: 'Свет сквозь текстуру дуба.',
       cat: 'Свет',
       num: '03',
@@ -54,6 +57,7 @@
     },
     {
       id: 'shelf',
+      draw: 'img/draw-shelf.webp',
       line: 'Необычные формы. Смелые решения.',
       cat: 'Полки',
       num: '04',
@@ -70,6 +74,7 @@
     },
     {
       id: 'stand',
+      draw: 'img/draw-stand.webp',
       line: 'Дуб для всего, что звучит.',
       cat: 'Мебель',
       num: '05',
@@ -85,6 +90,7 @@
     },
     {
       id: 'amber',
+      draw: 'img/draw-amber.webp',
       line: 'Детали, создающие атмосферу.',
       cat: 'Свет',
       num: '06',
@@ -156,7 +162,7 @@
           <span class="card__cat">${p.cat}</span>
           <span class="card__line mono">${p.line}</span>
         </span>
-        <span class="card__photo">${swapImg(p.day[0], p.night[0], p.alt, true, p.pos)}</span>
+        <span class="card__photo">${swapImg(p.day[0], p.night[0], p.alt, true, p.pos)}<img class="swap__draw" src="${p.draw}" alt="" loading="lazy" decoding="async"></span>
         <span class="card__foot">
           <span class="card__caption">
             <span class="card__title">${p.title}</span>
@@ -175,7 +181,12 @@
   let current = null;
 
   function renderStage(p, i) {
-    stage.innerHTML = swapImg(p.day[i], p.night[i] || p.day[i], p.alt, false);
+    const isDraw = i >= p.day.length;
+    stage.classList.toggle('is-draw', isDraw);
+    stage.innerHTML = isDraw
+      ? `<img class="stage__draw" src="${p.draw}" alt="Чертёж: ${p.title}">`
+      : swapImg(p.day[i], p.night[i] || p.day[i], p.alt, false);
+    document.getElementById('modalDims').style.display = isDraw ? 'none' : '';
     [...thumbs.children].forEach((t, k) => t.classList.toggle('is-active', k === i));
   }
 
@@ -195,8 +206,9 @@
     const L = get('Длина'), H = get('Высота'), W = get('Ширина');
     dims.innerHTML = (L ? `<span class="dim dim--h"><i>${L}</i></span>` : '') + (H ? `<span class="dim dim--v"><i>${H}</i></span>` : '') + (W ? `<span class="dim dim--w mono">ширина ${W}</span>` : '');
     dims.hidden = !(L || H);
-    thumbs.innerHTML = p.day.map((d, i) => `<button type="button" class="modal__thumb" aria-label="Фото ${i + 1}">${swapImg(d, p.night[i] || d, '', false)}</button>`).join('');
-    thumbs.hidden = p.day.length < 2;
+    thumbs.innerHTML = p.day.map((d, i) => `<button type="button" class="modal__thumb" aria-label="Фото ${i + 1}">${swapImg(d, p.night[i] || d, '', false)}</button>`).join('')
+      + `<button type="button" class="modal__thumb modal__thumb--draw" aria-label="Чертёж"><img src="${p.draw}" alt=""><span class="mono">чертёж</span></button>`;
+    thumbs.hidden = false;
     [...thumbs.children].forEach((t, i) => t.addEventListener('click', () => renderStage(p, i)));
     renderStage(p, 0);
 
@@ -228,11 +240,114 @@
     if (modal.hidden) return;
     if (e.key === 'Escape') closeModal();
     if (current && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-      const n = current.day.length;
+      const n = current.day.length + 1;
       const active = [...thumbs.children].findIndex((t) => t.classList.contains('is-active'));
       renderStage(current, (active + (e.key === 'ArrowRight' ? 1 : n - 1)) % n);
     }
   });
+
+  /* ---------- «плоттер»: прочерчивание линий ---------- */
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function drawables(svg) {
+    return [...svg.querySelectorAll('path, circle, line, polyline, rect, ellipse')].filter((el) => !el.hasAttribute('stroke-dasharray'));
+  }
+  function prepDraw(svg) {
+    drawables(svg).forEach((el) => {
+      let L = 0; try { L = el.getTotalLength(); } catch (e) { return; }
+      if (!L) return;
+      el.style.strokeDasharray = L + ' ' + L;
+      el.style.strokeDashoffset = L;
+      el.style.transition = 'none';
+      if (el.getAttribute('fill') && el.getAttribute('fill') !== 'none') { el.dataset.fill = el.getAttribute('fill'); el.style.fillOpacity = '0'; }
+    });
+  }
+  function playDraw(svg, total) {
+    const els = drawables(svg).filter((el) => el.style.strokeDasharray);
+    const step = Math.min(70, total / Math.max(els.length, 1));
+    els.forEach((el, i) => {
+      const L = parseFloat(el.style.strokeDasharray);
+      const dur = Math.min(900, Math.max(250, L * 1.2));
+      el.style.transition = `stroke-dashoffset ${dur}ms linear ${i * step}ms, fill-opacity .4s ease ${i * step + dur}ms`;
+      el.style.strokeDashoffset = 0;
+      if (el.dataset.fill) el.style.fillOpacity = '1';
+    });
+  }
+  if (!reduceMotion) {
+    const svgs = [...document.querySelectorAll('svg.draw')];
+    svgs.forEach(prepDraw);
+    const dio = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { playDraw(en.target, 1800); dio.unobserve(en.target); } });
+    }, { threshold: 0.25 });
+    svgs.forEach((s) => dio.observe(s));
+  }
+
+  /* ---------- выноски на фото: линия всегда упирается в рамку ---------- */
+  const leaders = document.getElementById('leaders');
+  function drawLeaders() {
+    if (!leaders) return;
+    const fig = leaders.parentElement;
+    const W = fig.clientWidth, H = fig.clientHeight;
+    if (!W || !H) return;
+    leaders.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    let s = '';
+    fig.querySelectorAll('.callout').forEach((c) => {
+      if (getComputedStyle(c).display === 'none') return;
+      const x = W * parseFloat(c.dataset.x) / 100, y = H * parseFloat(c.dataset.y) / 100;
+      const bx = c.offsetLeft, by = c.offsetTop, bw = c.offsetWidth, bh = c.offsetHeight;
+      // ближайшая точка на рамке
+      const px = Math.max(bx, Math.min(x, bx + bw)), py = Math.max(by, Math.min(y, by + bh));
+      s += `<path d="M${x} ${y}L${px} ${py}"/><circle cx="${x}" cy="${y}" r="4"/>`;
+    });
+    leaders.innerHTML = s;
+  }
+  drawLeaders();
+  addEventListener('resize', drawLeaders);
+  if (document.fonts) document.fonts.ready.then(drawLeaders);
+  addEventListener('load', drawLeaders);
+
+  /* ---------- курсор-перекрестие с координатами ---------- */
+  const xh = document.getElementById('xhair');
+  if (xh && matchMedia('(pointer: fine)').matches && !reduceMotion) {
+    const v = xh.querySelector('.xhair__v'), hz = xh.querySelector('.xhair__h'), lbl = xh.querySelector('.xhair__lbl');
+    let mx = -1, my = -1, raf = 0;
+    const pad = (n) => String(Math.round(n)).padStart(4, '0');
+    function tick() {
+      raf = 0;
+      v.style.transform = `translateX(${mx}px)`;
+      hz.style.transform = `translateY(${my}px)`;
+      lbl.style.transform = `translate(${mx + 14}px, ${my + 14}px)`;
+      lbl.textContent = `x ${pad(mx)}  y ${pad(my + scrollY)}`;
+    }
+    document.addEventListener('mousemove', (e) => {
+      mx = e.clientX; my = e.clientY;
+      xh.classList.add('is-on');
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    document.addEventListener('mouseleave', () => xh.classList.remove('is-on'));
+    document.addEventListener('mouseover', (e) => {
+      xh.classList.toggle('is-hidden', !!e.target.closest('a, button, .modal'));
+    });
+  }
+
+  /* ---------- прелоадер «лист чертежа» ---------- */
+  const loader = document.getElementById('loader');
+  let seen = false; try { seen = sessionStorage.getItem('bw-sheet') === '1'; } catch (e) { /* */ }
+  if (loader && !seen && !reduceMotion) {
+    const W = innerWidth, H = innerHeight, m = Math.round(Math.min(W, H) * 0.045);
+    const sw = Math.min(360, W - 2 * m - 20), sh = 70, sx = W - m - sw, sy = H - m - sh;
+    const svg = document.getElementById('loaderSvg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = `<rect x="${m}" y="${m}" width="${W - 2 * m}" height="${H - 2 * m}"/>
+      <rect x="${sx}" y="${sy}" width="${sw}" height="${sh}"/>
+      <path d="M${sx} ${sy + sh / 2}H${sx + sw}"/><path d="M${sx + sw * .34} ${sy}V${sy + sh}"/><path d="M${sx + sw * .68} ${sy}V${sy + sh}"/>
+      <path d="M${m + 18} ${m + 18}h40M${m + 18} ${m + 18}v40"/><path d="M${W - m - 18} ${H - m - 18}h-40M${W - m - 18} ${H - m - 18}v-40"/>
+      <path d="M${W / 2 - 60} ${H / 2}h120M${W / 2} ${H / 2 - 60}v120"/>`;
+    prepDraw(svg);
+    requestAnimationFrame(() => playDraw(svg, 900));
+    setTimeout(() => loader.classList.add('is-text'), 900);
+    setTimeout(() => { loader.classList.add('is-done'); try { sessionStorage.setItem('bw-sheet', '1'); } catch (e) { /* */ } }, 1750);
+    setTimeout(() => loader.remove(), 2400);
+  } else if (loader) { loader.remove(); }
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {
