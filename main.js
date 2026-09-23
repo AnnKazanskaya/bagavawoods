@@ -133,7 +133,7 @@
     root.dataset.theme = theme;
     toggle.setAttribute('aria-checked', theme === 'night' ? 'true' : 'false');
     if (metaTheme) metaTheme.setAttribute('content', theme === 'night' ? '#0b0a08' : '#efece4');
-    try { localStorage.setItem('bw-theme', theme); } catch (e) { /* private mode */ }
+    try { sessionStorage.setItem('bw-theme', theme); localStorage.removeItem('bw-theme'); } catch (e) { /* private mode */ }
   }
   applyTheme(root.dataset.theme === 'night' ? 'night' : 'day', false);
   toggle.addEventListener('click', () => {
@@ -442,18 +442,38 @@
     voice.addEventListener('ended', () => voiceBtn.classList.remove('is-playing'));
   }
 
-  /* ---------- вечером предлагаем ночь ---------- */
+  /* ---------- подсказки: вечером и после 50 секунд ---------- */
   const toast = document.getElementById('toast');
+  let themeTouched = false;
+  toggle.addEventListener('click', () => { themeTouched = true; });
   if (toast) {
-    let stored = null, asked = false;
-    try { stored = localStorage.getItem('bw-theme'); asked = sessionStorage.getItem('bw-asked') === '1'; } catch (e) { /* */ }
-    const hr = new Date().getHours();
-    if (!stored && !asked && (hr >= 20 || hr < 6) && root.dataset.theme === 'day') {
-      loaderDone.then(() => setTimeout(() => { toast.hidden = false; requestAnimationFrame(() => toast.classList.add('is-on')); }, 2500));
-      const hide = () => { toast.classList.remove('is-on'); setTimeout(() => { toast.hidden = true; }, 400); try { sessionStorage.setItem('bw-asked', '1'); } catch (e) { /* */ } };
-      toast.querySelector('[data-yes]').addEventListener('click', () => { applyTheme('night', true); hide(); });
-      toast.querySelector('[data-no]').addEventListener('click', hide);
+    const txt = toast.querySelector('.hand'), yes = toast.querySelector('[data-yes]'), no = toast.querySelector('[data-no]');
+    let shownCount = 0, visible = false;
+    const hide = () => { visible = false; toast.classList.remove('is-on'); setTimeout(() => { toast.hidden = true; }, 400); };
+    function show(text, yesLabel, onYes) {
+      if (visible || themeTouched) return;
+      shownCount += 1; visible = true;
+      txt.textContent = text; yes.textContent = yesLabel;
+      toast.hidden = false; requestAnimationFrame(() => toast.classList.add('is-on'));
+      yes.onclick = () => { onYes(); hide(); };
+      no.onclick = hide;
     }
+    let asked = false; try { asked = sessionStorage.getItem('bw-asked') === '1'; } catch (e) { /* */ }
+    const hr = new Date().getHours();
+    loaderDone.then(() => {
+      if (asked) return;
+      try { sessionStorage.setItem('bw-asked', '1'); } catch (e) { /* */ }
+      if ((hr >= 20 || hr < 6) && root.dataset.theme === 'day') {
+        setTimeout(() => show('Уже вечер. Хочешь посмотреть, как сейчас лампа освещала бы твою комнату?', 'хочу', () => {
+          applyTheme('night', true);
+          document.querySelector('.hero__photo').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }), 2500);
+      }
+      setTimeout(() => show('Попробуй ночную и дневную тему: посмотри, как выглядят мои работы ночью и днём.', 'переключить', () => {
+        applyTheme(root.dataset.theme === 'night' ? 'day' : 'night', true);
+        document.getElementById('works').scrollIntoView({ behavior: 'smooth' });
+      }), 50000);
+    });
   }
 
   /* ---------- образцы пород: тап на телефоне ---------- */
@@ -506,88 +526,43 @@
     renderStep();
   }
 
-  /* ---------- звук мастерской: синтез в браузере, без файлов ---------- */
+  /* ---------- звук мастерской: настоящие записи, зацикленные ---------- */
   const soundBtn = document.getElementById('soundBtn');
   const ambient = (() => {
-    let ctx = null, master = null, analyser = null, nodes = [], timers = [], on = false, mode = 'day';
-    function noiseBuffer(seconds) {
-      const b = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate), d = b.getChannelData(0);
-      let b0 = 0, b1 = 0, b2 = 0;
-      for (let i = 0; i < d.length; i++) { // розовый шум
-        const w = Math.random() * 2 - 1;
-        b0 = 0.997 * b0 + 0.029591 * w; b1 = 0.985 * b1 + 0.032534 * w; b2 = 0.95 * b2 + 0.048056 * w;
-        d[i] = (b0 + b1 + b2 + w * 0.05) * 0.25;
+    const LEVELS = { day: { birds: 1, workshop: 0.35, crickets: 0 }, night: { birds: 0, workshop: 0.35, crickets: 1 } };
+    const tracks = {};
+    let on = false, mode = 'day', raf = 0;
+    function track(name) {
+      if (!tracks[name]) { const a = new Audio(`audio/${name}.mp3`); a.loop = true; a.preload = 'none'; a.volume = 0; tracks[name] = { a, target: 0 }; }
+      return tracks[name];
+    }
+    function tick() {
+      let busy = false;
+      for (const k in tracks) {
+        const t = tracks[k], d = t.target - t.a.volume;
+        if (Math.abs(d) > 0.01) { t.a.volume = Math.max(0, Math.min(1, t.a.volume + d * 0.08)); busy = true; }
+        else if (t.a.volume !== t.target) t.a.volume = t.target;
+        if (t.target === 0 && t.a.volume === 0 && !t.a.paused) t.a.pause();
       }
-      return b;
+      raf = busy ? requestAnimationFrame(tick) : 0;
     }
-    function rand(a, b) { return a + Math.random() * (b - a); }
-    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
-    function roomTone() {
-      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(4); src.loop = true;
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
-      const g = ctx.createGain(); g.gain.value = 0.35;
-      src.connect(lp).connect(g).connect(master); src.start(); nodes.push(src);
-    }
-    function sawStroke() { // далёкая ножовка: ритмичные вздохи шума
-      if (!on) return;
-      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(3);
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = rand(900, 1400); bp.Q.value = 1.2;
-      const g = ctx.createGain(); g.gain.value = 0;
-      const t = ctx.currentTime, strokes = 4 + Math.floor(Math.random() * 4), per = rand(0.42, 0.55);
-      for (let i = 0; i < strokes; i++) { g.gain.setValueAtTime(0.001, t + i * per); g.gain.linearRampToValueAtTime(rand(0.18, 0.3), t + i * per + per * 0.35); g.gain.linearRampToValueAtTime(0.001, t + i * per + per * 0.9); }
-      src.connect(bp).connect(g).connect(master); src.start(t); src.stop(t + strokes * per + 0.2);
-      later(sawStroke, rand(14000, 30000));
-    }
-    function shavings() { // шорох стружки
-      if (!on) return;
-      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(1);
-      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2400;
-      const g = ctx.createGain(); const t = ctx.currentTime;
-      g.gain.setValueAtTime(0.001, t); g.gain.linearRampToValueAtTime(0.12, t + 0.08); g.gain.exponentialRampToValueAtTime(0.001, t + rand(0.3, 0.7));
-      src.connect(hp).connect(g).connect(master); src.start(t); src.stop(t + 0.8);
-      later(shavings, rand(6000, 16000));
-    }
-    function bird() { // птица: короткие свисты с глиссандо
-      if (!on || mode !== 'day') return;
-      const n = 2 + Math.floor(Math.random() * 4), base = rand(2200, 3600), t0 = ctx.currentTime;
-      for (let i = 0; i < n; i++) {
-        const o = ctx.createOscillator(); o.type = 'sine';
-        const g = ctx.createGain(); const t = t0 + i * rand(0.12, 0.22);
-        o.frequency.setValueAtTime(base * rand(0.9, 1.1), t); o.frequency.exponentialRampToValueAtTime(base * rand(1.15, 1.5), t + 0.06); o.frequency.exponentialRampToValueAtTime(base * rand(0.8, 1), t + 0.14);
-        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(rand(0.06, 0.12), t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
-        o.connect(g).connect(master); o.start(t); o.stop(t + 0.2);
+    function apply() {
+      const lv = on ? LEVELS[mode] : { birds: 0, workshop: 0, crickets: 0 };
+      for (const name of ['birds', 'workshop', 'crickets']) {
+        const t = track(name); t.target = lv[name];
+        if (t.target > 0 && t.a.paused) { t.a.play().catch(() => {}); }
       }
-      later(bird, rand(2500, 7000));
+      if (!raf) raf = requestAnimationFrame(tick);
     }
-    function cricket(freq, rate) { // сверчок: высокий тон с трелью
-      if (!on || mode !== 'night') return;
-      const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = freq;
-      const am = ctx.createOscillator(); am.type = 'square'; am.frequency.value = rate;
-      const amG = ctx.createGain(); amG.gain.value = 0.5;
-      const g = ctx.createGain(); g.gain.value = 0;
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 8;
-      am.connect(amG).connect(g.gain);
-      const t = ctx.currentTime, len = rand(0.5, 1.4);
-      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.09, t + 0.05); g.gain.setValueAtTime(0.09, t + len - 0.05); g.gain.linearRampToValueAtTime(0.0001, t + len);
-      o.connect(bp).connect(g).connect(master); o.start(t); am.start(t); o.stop(t + len + 0.05); am.stop(t + len + 0.05);
-      later(() => cricket(freq, rate), len * 1000 + rand(300, 1600));
-    }
-    function stop() {
-      on = false; timers.forEach(clearTimeout); timers = [];
-      if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8); }
-      later(() => { nodes.forEach((n) => { try { n.stop(); } catch (e) { /* */ } }); nodes = []; if (ctx) ctx.suspend(); }, 900);
-    }
-    function start(theme) {
-      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); analyser = ctx.createAnalyser(); analyser.fftSize = 256; master.connect(analyser).connect(ctx.destination); }
-      ctx.resume().catch(() => {}); timers.forEach(clearTimeout); timers = []; nodes.forEach((n) => { try { n.stop(); } catch (e) { /* */ } }); nodes = [];
-      on = true; mode = theme;
-      master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(0.0001, ctx.currentTime); master.gain.linearRampToValueAtTime(1, ctx.currentTime + 1.2);
-      roomTone(); later(sawStroke, rand(3000, 8000)); later(shavings, rand(1500, 5000));
-      if (theme === 'day') { later(bird, 600); later(bird, 2400); }
-      else { later(() => cricket(4300, 26), 300); later(() => cricket(3900, 22), 900); later(() => cricket(4700, 30), 1600); }
-    }
-    function level() { if (!analyser) return 0; const d = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(d); let s = 0; for (let i = 0; i < d.length; i++) { const v = (d[i] - 128) / 128; s += v * v; } return Math.sqrt(s / d.length); }
-    return { start, stop, isOn: () => on, setMode: (t) => { if (on) start(t); }, state: () => (ctx ? ctx.state : 'none'), level, resume: () => { if (ctx && on) ctx.resume().catch(() => {}); } };
+    return {
+      start: (theme) => { on = true; mode = theme; apply(); },
+      stop: () => { on = false; apply(); },
+      isOn: () => on,
+      setMode: (t) => { mode = t; if (on) apply(); },
+      state: () => (on ? 'running' : 'off'),
+      level: () => Object.values(tracks).reduce((s, t) => s + (t.a.paused ? 0 : t.a.volume), 0),
+      resume: () => { if (on) apply(); }
+    };
   })();
   if (soundBtn) {
     const lbl = soundBtn.querySelector('.sound__lbl');
