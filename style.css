@@ -758,8 +758,7 @@ html.is-loading, html.is-locked { overflow: hidden; }
 .sound.is-on .sound__ico--off { display: none; }
 .sound.is-on .sound__ico--on { display: block; }
 .sound.is-on { color: var(--ink); border-color: var(--line); background: var(--accent); color: var(--accent-ink); }
-:root[data-theme="night"] .sound.is-on { background: var(--accent); color: var(--accent-ink); }
-:root[data-theme="night"] .sound.is-on { color: var(--accent); border-color: var(--accent); }
+:root[data-theme="night"] .sound.is-on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .modal__origin { margin-top: -8px; color: var(--ink-2); }
 .modal__origin::before { content: ""; display: inline-block; width: 14px; height: 1px; background: currentColor; margin-right: 8px; vertical-align: middle; }
 /* телефон: шапка с кнопкой звука */
