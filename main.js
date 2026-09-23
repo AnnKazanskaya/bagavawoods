@@ -584,7 +584,7 @@
 
   /* ---------- высота шапки для мобильного меню ---------- */
   function setHeaderH() { document.documentElement.style.setProperty('--header-h', document.querySelector('.header').offsetHeight + 'px'); }
-  setHeaderH(); addEventListener('resize', setHeaderH);
+  setHeaderH(); addEventListener('resize', setHeaderH); if (document.fonts) document.fonts.ready.then(setHeaderH); addEventListener('load', setHeaderH);
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {
