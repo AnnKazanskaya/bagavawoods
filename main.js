@@ -124,6 +124,7 @@
   const toggle = document.getElementById('themeToggle');
   const metaTheme = document.querySelector('meta[name="theme-color"]');
 
+  const onTheme = [];
   function applyTheme(theme, animate) {
     if (animate) {
       root.classList.add('theme-anim');
@@ -134,6 +135,7 @@
     toggle.setAttribute('aria-checked', theme === 'night' ? 'true' : 'false');
     if (metaTheme) metaTheme.setAttribute('content', theme === 'night' ? '#0b0a08' : '#efece4');
     try { sessionStorage.setItem('bw-theme', theme); localStorage.removeItem('bw-theme'); } catch (e) { /* private mode */ }
+    onTheme.forEach((f) => f(theme));
   }
   applyTheme(root.dataset.theme === 'night' ? 'night' : 'day', false);
   toggle.addEventListener('click', () => {
@@ -576,7 +578,7 @@
     soundBtn.addEventListener('click', () => setSound(!ambient.isOn()));
     window.bwAmbient = ambient;
     ['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => ambient.resume(), { passive: true }));
-    toggle.addEventListener('click', () => { if (ambient.isOn()) { ambient.setMode(root.dataset.theme); lbl.textContent = root.dataset.theme === 'night' ? 'звук: ночь' : 'звук: день'; } });
+    onTheme.push((t) => { if (ambient.isOn()) { ambient.setMode(t); lbl.textContent = t === 'night' ? 'звук: ночь' : 'звук: день'; } });
     document.addEventListener('visibilitychange', () => { if (document.hidden && ambient.isOn()) setSound(false); });
   }
 
