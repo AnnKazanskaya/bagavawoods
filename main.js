@@ -359,9 +359,9 @@
     const finish = new Promise((resolve) => {
       function frame(now) {
         const t = (now - t0) / 1000;
-        if ((loaded || t > 1.9) && !tLoaded) tLoaded = t;
-        // до 90 % за 1,4 с, дальше ждём загрузку (максимум до 1,9 с), потом добираем до 100 % за 0,4 с
-        progress = tLoaded ? 0.9 + 0.1 * Math.min(1, (t - tLoaded) / 0.4) : 0.9 * ease(Math.min(1, t / 1.4));
+        if ((loaded && t > 2.4 || t > 2.9) && !tLoaded) tLoaded = t;
+        // до 90 % за 2,4 с, дальше ждём загрузку (максимум до 2,9 с), потом добираем до 100 % за 0,5 с
+        progress = tLoaded ? 0.9 + 0.1 * Math.min(1, (t - tLoaded) / 0.5) : 0.9 * ease(Math.min(1, t / 2.4));
         const shown = Math.round(progress * ringEls.length);
         if (shown !== shownPrev) { ringEls.forEach((el, i) => { el.style.opacity = i < shown ? '1' : '0'; }); shownPrev = shown; }
         pct.textContent = String(Math.round(progress * 100)).padStart(2, '0') + ' %';
