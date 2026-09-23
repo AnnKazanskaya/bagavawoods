@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 <script>
   (function(){try{var t=localStorage.getItem('bw-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'night':'day';}document.documentElement.dataset.theme=t;}catch(e){}})();
 </script>
@@ -78,13 +78,19 @@
         <span class="mono">не повторяем.<br>создаём.</span>
         <span class="dots dots--sm" aria-hidden="true"></span>
       </figcaption>
+      <svg class="leaders" viewBox="0 0 100 110" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M58 40 L24 18" vector-effect="non-scaling-stroke"/><circle cx="58" cy="40" r="1.2" vector-effect="non-scaling-stroke"/>
+        <path d="M38 80 L64 100" vector-effect="non-scaling-stroke"/><circle cx="38" cy="80" r="1.2" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <span class="callout callout--a mono" aria-hidden="true">поз. 1<br>абажур: шпон дуба</span>
+      <span class="callout callout--b mono" aria-hidden="true">поз. 2<br>основание: массив сосны</span>
+      <span class="marks" aria-hidden="true"></span>
     </figure>
 
-    <div class="hero__note cell">
+    <div class="hero__note cell"><span class="marks" aria-hidden="true"></span>
       <p class="hand">Привет, я Ильшат.<br>Мне 21 год.<br>Берусь за то, от чего другие отказываются: сложные конструкции, необычные формы, <u>смелые идеи.</u></p>
       <span class="hand hero__sign">Ильшат.</span>
       <span class="dots dots--col" aria-hidden="true"></span>
-      <span class="boxx" aria-hidden="true"></span>
     </div>
   </div>
 
@@ -125,6 +131,8 @@
   <span class="vtext vtext--right mono" aria-hidden="true">bagavawoods</span>
 </section>
 
+<div class="ruler" aria-hidden="true"></div>
+
 <!-- ================= MARQUEE ================= -->
 <div class="marquee" aria-hidden="true">
   <div class="marquee__track">
@@ -137,6 +145,7 @@
 <section class="section about" id="about" aria-labelledby="aboutTitle">
   <header class="section__head">
     <span class="num">01</span>
+    <span class="sheet mono">лист 01 / 05</span>
     <h2 class="section__title" id="aboutTitle">О мастерской</h2>
     <span class="dots dots--sm section__dots" aria-hidden="true"></span>
   </header>
@@ -145,7 +154,6 @@
     <div class="about__text">
       <p class="lead">BAGAVAWOODS: небольшая мастерская, где вещи делаются руками и&nbsp;от&nbsp;начала до&nbsp;конца одним человеком. Никакой имитации: только массив, натуральные покрытия и&nbsp;честные соединения.</p>
       <p>Я&nbsp;люблю задачи, которые не&nbsp;решаются по&nbsp;шаблону: гнутая полка-петля, столик на&nbsp;цельном валуне, лампа, у&nbsp;которой светится сама текстура дуба. Если у&nbsp;вас есть идея, которую «нельзя сделать», напишите мне.</p>
-      <span class="boxx boxx--lg" aria-hidden="true"></span>
     </div>
     <ul class="principles" role="list">
       <li>
@@ -171,6 +179,7 @@
 <section class="section works" id="works" aria-labelledby="worksTitle">
   <header class="section__head">
     <span class="num">02</span>
+    <span class="sheet mono">лист 02 / 05</span>
     <h2 class="section__title" id="worksTitle">Работы</h2>
     <p class="section__hint mono">нажмите на карточку, чтобы посмотреть подробнее</p>
   </header>
@@ -187,6 +196,7 @@
 <section class="section process" id="process" aria-labelledby="processTitle">
   <header class="section__head">
     <span class="num">03</span>
+    <span class="sheet mono">лист 03 / 05</span>
     <h2 class="section__title" id="processTitle">Процесс</h2>
     <span class="dots dots--sm section__dots" aria-hidden="true"></span>
   </header>
@@ -218,6 +228,7 @@
 <section class="section materials" id="materials" aria-labelledby="materialsTitle">
   <header class="section__head">
     <span class="num">04</span>
+    <span class="sheet mono">лист 04 / 05</span>
     <h2 class="section__title" id="materialsTitle">Материалы</h2>
     <span class="dots dots--sm section__dots" aria-hidden="true"></span>
   </header>
@@ -257,11 +268,10 @@
       <span class="order__title" id="orderTitle">Заказать</span>
       <svg class="order__chev" width="34" height="34"><use href="#i-chev"/></svg>
     </a>
-    <div class="order__ask cell">
+    <div class="order__ask cell"><span class="marks" aria-hidden="true"></span>
       <p>Хотите что-то<br>уникальное?</p>
       <p class="order__ask-sub">Опишите идею,<br>реализуем.</p>
       <span class="dots dots--col" aria-hidden="true"></span>
-      <span class="boxx" aria-hidden="true"></span>
     </div>
 
     <div class="order__side cell" aria-hidden="true"><span class="vtext mono">сделано вручную. сделано с душой.</span></div>
@@ -286,11 +296,20 @@
   </div>
 </section>
 </main>
+<div class="ruler" aria-hidden="true"></div>
 
 <footer class="footer">
-  <span class="footer__logo">BAGAVAWOODS</span>
-  <span class="mono">2026 © все права защищены</span>
-  <span class="mono footer__tag">ручная работа. честные материалы. живые формы.</span>
+  <table class="stamp" aria-label="Штамп чертежа">
+    <tr><th colspan="2">BAGAVAWOODS</th><td>лист</td><td>1</td><td>листов</td><td>1</td></tr>
+    <tr><td>разраб.</td><td>Ильшат</td><td>материал</td><td colspan="3">массив дуба, массив сосны</td></tr>
+    <tr><td>проверил</td><td>заказчик</td><td>покрытие</td><td colspan="3">бесцветное масло + воск</td></tr>
+    <tr><td>масштаб</td><td>1:1</td><td>соединения</td><td colspan="3">шип-паз, без саморезов</td></tr>
+  </table>
+  <div class="footer__row">
+    <span class="footer__logo">BAGAVAWOODS</span>
+    <span class="mono">2026 © все права защищены</span>
+    <span class="mono footer__tag">ручная работа. честные материалы. живые формы.</span>
+  </div>
 </footer>
 
 <!-- ================= MODAL ================= -->
@@ -302,6 +321,7 @@
     </button>
     <div class="modal__gallery">
       <div class="modal__stage" id="modalStage"></div>
+      <div class="dims" id="modalDims" aria-hidden="true"></div>
       <div class="modal__thumbs" id="modalThumbs"></div>
     </div>
     <div class="modal__info">
@@ -315,6 +335,6 @@
   </div>
 </div>
 
-<script src="main.js?v=4"></script>
+<script src="main.js?v=5"></script>
 </body>
 </html>

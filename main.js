@@ -190,6 +190,11 @@
     feat.hidden = p.feat.length === 0;
     document.getElementById('modalOrder').href = TG + '?text=' + encodeURIComponent('Здравствуйте! Интересует: ' + p.title);
 
+    const dims = document.getElementById('modalDims');
+    const get = (k) => (p.specs.find((s) => s[0] === k) || [])[1];
+    const L = get('Длина'), H = get('Высота'), W = get('Ширина');
+    dims.innerHTML = (L ? `<span class="dim dim--h"><i>${L}</i></span>` : '') + (H ? `<span class="dim dim--v"><i>${H}</i></span>` : '') + (W ? `<span class="dim dim--w mono">ширина ${W}</span>` : '');
+    dims.hidden = !(L || H);
     thumbs.innerHTML = p.day.map((d, i) => `<button type="button" class="modal__thumb" aria-label="Фото ${i + 1}">${swapImg(d, p.night[i] || d, '', false)}</button>`).join('');
     thumbs.hidden = p.day.length < 2;
     [...thumbs.children].forEach((t, i) => t.addEventListener('click', () => renderStage(p, i)));
@@ -228,6 +233,22 @@
       renderStage(current, (active + (e.key === 'ArrowRight' ? 1 : n - 1)) % n);
     }
   });
+
+  /* ---------- rulers ---------- */
+  function buildRuler(el) {
+    const w = el.clientWidth || 1200;
+    const h = 22;
+    let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" stroke="currentColor" stroke-width="1">`;
+    for (let x = 0; x <= w; x += 10) {
+      const big = x % 100 === 0, mid = x % 50 === 0;
+      s += `<path d="M${x + .5} ${h}V${h - (big ? 14 : mid ? 9 : 5)}"/>`;
+      if (big) s += `<text x="${x + 4}" y="9" font-size="8" font-family="JetBrains Mono, monospace" fill="currentColor" stroke="none">${x / 10}</text>`;
+    }
+    el.innerHTML = s + '</svg>';
+  }
+  const rulers = [...document.querySelectorAll('.ruler')];
+  rulers.forEach(buildRuler);
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => rulers.forEach(buildRuler), 150); });
 
   /* ---------- reveal on scroll ---------- */
   const io = new IntersectionObserver((entries) => {
