@@ -397,11 +397,12 @@
   } else if (roll) { roll.remove(); }
 
   /* ---------- опилки при клике на «заказать» ---------- */
-  let dustDone = false;
-  function sawdust(x, y) {
-    if (dustDone || reduceMotion) return; dustDone = true;
+  let dustAt = 0;
+  function sawdust(x, y, n) {
+    const now = Date.now();
+    if (reduceMotion || now - dustAt < 350) return; dustAt = now;
     const colors = ['#c9a252', '#a8783a', '#e0c48a', '#8b5e2b', '#d9b26a'];
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < n; i++) {
       const p = document.createElement('i');
       p.className = 'dust';
       const w = 3 + Math.random() * 6, hgt = 1.5 + Math.random() * 2.5;
@@ -417,8 +418,11 @@
     }
   }
   document.addEventListener('click', (e) => {
-    const b = e.target.closest('.order__cta, .order__link, #modalOrder, .order__handle');
-    if (b) sawdust(e.clientX, e.clientY);
+    if (!e.isTrusted) return;
+    const big = e.target.closest('.order__cta, .order__link, #modalOrder, .order__handle');
+    const any = e.target.closest('button, .btn, a[href]');
+    if (big) sawdust(e.clientX, e.clientY, 26);
+    else if (any) sawdust(e.clientX, e.clientY, 14);
   });
 
   /* ---------- голос мастера ---------- */
