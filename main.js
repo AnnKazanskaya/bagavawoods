@@ -322,7 +322,7 @@
       const bx = c.offsetLeft, by = c.offsetTop, bw = c.offsetWidth, bh = c.offsetHeight;
       // ближайшая точка на рамке
       const px = Math.max(bx, Math.min(x, bx + bw)), py = Math.max(by, Math.min(y, by + bh));
-      s += `<path d="M${x} ${y}L${px} ${py}"/><circle cx="${x}" cy="${y}" r="4"/>`;
+      s += `<path class="lead-bg" d="M${x} ${y}L${px} ${py}"/><path d="M${x} ${y}L${px} ${py}"/><circle class="lead-bg" cx="${x}" cy="${y}" r="6"/><circle cx="${x}" cy="${y}" r="3.5"/>`;
     });
     leaders.innerHTML = s;
   }
@@ -581,6 +581,10 @@
     onTheme.push((t) => { if (ambient.isOn()) { ambient.setMode(t); lbl.textContent = t === 'night' ? 'звук: ночь' : 'звук: день'; } });
     document.addEventListener('visibilitychange', () => { if (document.hidden && ambient.isOn()) setSound(false); });
   }
+
+  /* ---------- высота шапки для мобильного меню ---------- */
+  function setHeaderH() { document.documentElement.style.setProperty('--header-h', document.querySelector('.header').offsetHeight + 'px'); }
+  setHeaderH(); addEventListener('resize', setHeaderH);
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {
