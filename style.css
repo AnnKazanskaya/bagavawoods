@@ -684,7 +684,7 @@ html.is-loading, html.is-locked { overflow: hidden; }
   .hero__note { padding-bottom: var(--gutter) !important; }
   .hero__sign { bottom: auto; top: var(--gutter); right: var(--gutter); }
   .mat--tex { padding-bottom: 22px; }
-  .sample { position: static; display: inline-block; margin: 16px 100px 0 0; vertical-align: middle; }
+  .sample { position: relative; left: auto; bottom: auto; display: inline-block; margin: 16px 100px 0 0; vertical-align: middle; }
   .mat .pnote { position: static; display: block; margin-top: 12px; }
   .toast { flex-wrap: wrap; justify-content: center; text-align: center; }
 }
