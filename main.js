@@ -8,6 +8,7 @@
   const PRODUCTS = [
     {
       id: 'table',
+      origin: 'дуб, Пермский край, спилен в 2023, сушился 14 месяцев; валун с берега Камы',
       smell: 'дуб, мокрый камень, трава после дождя',
       draw: 'img/draw-table.webp',
       line: 'Живая форма. Натуральный характер.',
@@ -26,6 +27,7 @@
     },
     {
       id: 'tv',
+      origin: 'дуб, Башкирия, спилен в 2022, сушился 18 месяцев',
       smell: 'дуб, тёплое масло, воск',
       draw: 'img/draw-tv.webp',
       line: 'Функциональность. Чистые линии.',
@@ -43,6 +45,7 @@
     },
     {
       id: 'lamp',
+      origin: 'сосна, Пермский край, 2024, сушка 8 месяцев; шпон дуба из той же партии, что столик',
       smell: 'смола, сосна, нагретое дерево',
       draw: 'img/draw-lamp.webp',
       line: 'Свет сквозь текстуру дуба.',
@@ -60,6 +63,7 @@
     },
     {
       id: 'shelf',
+      origin: 'сосна, Пермский край, 2024; гнута паром за один вечер',
       note: 'клиент просил ниже, сделали 160',
       smell: 'сосновая смола, мох, лес',
       draw: 'img/draw-shelf.webp',
@@ -79,6 +83,7 @@
     },
     {
       id: 'stand',
+      origin: 'дуб, Башкирия, 2022, из той же доски, что тумба',
       smell: 'дуб, воск, немного пыли от винила',
       draw: 'img/draw-stand.webp',
       line: 'Дуб для всего, что звучит.',
@@ -96,6 +101,7 @@
     },
     {
       id: 'amber',
+      origin: 'дуб и сосна, Пермский край, 2024; шпон подбирался по рисунку вручную',
       smell: 'дуб, тёплый воск, свет',
       draw: 'img/draw-amber.webp',
       line: 'Детали, создающие атмосферу.',
@@ -204,6 +210,7 @@
     document.getElementById('modalTitle').textContent = p.title;
     document.getElementById('modalLead').textContent = p.lead;
     document.getElementById('modalSmell').textContent = 'пахнет: ' + p.smell;
+    document.getElementById('modalOrigin').textContent = 'откуда дерево: ' + p.origin;
     document.getElementById('modalSpecs').innerHTML = p.specs.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
     const feat = document.getElementById('modalFeat');
     feat.innerHTML = p.feat.map((f) => `<li>${f}</li>`).join('');
@@ -460,6 +467,140 @@
     });
   });
   document.querySelectorAll('.mat__tex').forEach((t) => t.addEventListener('click', () => t.closest('.mat').classList.remove('is-open')));
+
+  /* ---------- три вопроса вместо формы ---------- */
+  const wiz = document.getElementById('wizard');
+  if (wiz) {
+    const Q = [
+      { q: 'Что делаем?', key: 'what', opts: [['столик', 'журнальный столик'], ['тумбу', 'тумбу'], ['полку', 'полку'], ['лампу', 'лампу'], ['стойку', 'стойку для аппаратуры'], ['что-то своё', 'кое-что своё, опишу в сообщении']] },
+      { q: 'Где будет стоять?', key: 'where', opts: [['в гостиной', 'в гостиной'], ['в спальне', 'в спальне'], ['в кабинете', 'в кабинете'], ['на даче', 'на даче'], ['в кафе или офисе', 'в кафе или офисе']] },
+      { q: 'Когда нужно?', key: 'when', opts: [['не срочно', 'не срочно'], ['в течение месяца', 'в течение месяца'], ['к дате', 'к конкретной дате, напишу какой'], ['сначала посчитать', 'пока хочу только узнать цену и сроки']] }
+    ];
+    const qEl = document.getElementById('wizQ'), optsEl = document.getElementById('wizOpts'), stepEl = document.getElementById('wizStep');
+    const doneEl = document.getElementById('wizDone'), textEl = document.getElementById('wizText'), sendEl = document.getElementById('wizSend'), trailEl = document.getElementById('wizTrail');
+    let step = 0; const ans = {};
+    function renderStep() {
+      const s = Q[step];
+      stepEl.textContent = `шаг ${step + 1} / 3`;
+      qEl.textContent = s.q;
+      optsEl.innerHTML = s.opts.map(([label, phrase], i) => `<button type="button" class="wizard__opt" data-i="${i}"><span class="mono">${String(i + 1).padStart(2, '0')}</span>${label}</button>`).join('');
+      trailEl.textContent = Object.values(ans).map((a) => a.label).join(' · ');
+      doneEl.hidden = true; qEl.hidden = false; optsEl.hidden = false;
+    }
+    function finish() {
+      const text = `Здравствуйте! Хочу заказать ${ans.what.phrase}. Стоять будет ${ans.where.phrase}. По срокам: ${ans.when.phrase}.`;
+      textEl.textContent = text;
+      sendEl.href = TG + '?text=' + encodeURIComponent(text);
+      stepEl.textContent = 'готово';
+      qEl.hidden = true; optsEl.hidden = true; doneEl.hidden = false;
+      trailEl.textContent = Object.values(ans).map((a) => a.label).join(' · ');
+    }
+    optsEl.addEventListener('click', (e) => {
+      const b = e.target.closest('.wizard__opt'); if (!b) return;
+      const s = Q[step], [label, phrase] = s.opts[+b.dataset.i];
+      ans[s.key] = { label, phrase };
+      wiz.classList.add('is-switching');
+      setTimeout(() => { step += 1; if (step < Q.length) renderStep(); else finish(); wiz.classList.remove('is-switching'); }, 220);
+    });
+    document.getElementById('wizReset').addEventListener('click', () => { step = 0; for (const k in ans) delete ans[k]; renderStep(); });
+    renderStep();
+  }
+
+  /* ---------- звук мастерской: синтез в браузере, без файлов ---------- */
+  const soundBtn = document.getElementById('soundBtn');
+  const ambient = (() => {
+    let ctx = null, master = null, nodes = [], timers = [], on = false, mode = 'day';
+    function noiseBuffer(seconds) {
+      const b = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate), d = b.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < d.length; i++) { // розовый шум
+        const w = Math.random() * 2 - 1;
+        b0 = 0.997 * b0 + 0.029591 * w; b1 = 0.985 * b1 + 0.032534 * w; b2 = 0.95 * b2 + 0.048056 * w;
+        d[i] = (b0 + b1 + b2 + w * 0.05) * 0.25;
+      }
+      return b;
+    }
+    function rand(a, b) { return a + Math.random() * (b - a); }
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function roomTone() {
+      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(4); src.loop = true;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
+      const g = ctx.createGain(); g.gain.value = 0.07;
+      src.connect(lp).connect(g).connect(master); src.start(); nodes.push(src);
+    }
+    function sawStroke() { // далёкая ножовка: ритмичные вздохи шума
+      if (!on) return;
+      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(3);
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = rand(900, 1400); bp.Q.value = 1.2;
+      const g = ctx.createGain(); g.gain.value = 0;
+      const t = ctx.currentTime, strokes = 4 + Math.floor(Math.random() * 4), per = rand(0.42, 0.55);
+      for (let i = 0; i < strokes; i++) { g.gain.setValueAtTime(0.001, t + i * per); g.gain.linearRampToValueAtTime(rand(0.05, 0.09), t + i * per + per * 0.35); g.gain.linearRampToValueAtTime(0.001, t + i * per + per * 0.9); }
+      src.connect(bp).connect(g).connect(master); src.start(t); src.stop(t + strokes * per + 0.2);
+      later(sawStroke, rand(14000, 30000));
+    }
+    function shavings() { // шорох стружки
+      if (!on) return;
+      const src = ctx.createBufferSource(); src.buffer = noiseBuffer(1);
+      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2400;
+      const g = ctx.createGain(); const t = ctx.currentTime;
+      g.gain.setValueAtTime(0.001, t); g.gain.linearRampToValueAtTime(0.03, t + 0.08); g.gain.exponentialRampToValueAtTime(0.001, t + rand(0.3, 0.7));
+      src.connect(hp).connect(g).connect(master); src.start(t); src.stop(t + 0.8);
+      later(shavings, rand(6000, 16000));
+    }
+    function bird() { // птица: короткие свисты с глиссандо
+      if (!on || mode !== 'day') return;
+      const n = 2 + Math.floor(Math.random() * 4), base = rand(2200, 3600), t0 = ctx.currentTime;
+      for (let i = 0; i < n; i++) {
+        const o = ctx.createOscillator(); o.type = 'sine';
+        const g = ctx.createGain(); const t = t0 + i * rand(0.12, 0.22);
+        o.frequency.setValueAtTime(base * rand(0.9, 1.1), t); o.frequency.exponentialRampToValueAtTime(base * rand(1.15, 1.5), t + 0.06); o.frequency.exponentialRampToValueAtTime(base * rand(0.8, 1), t + 0.14);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(rand(0.02, 0.045), t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+        o.connect(g).connect(master); o.start(t); o.stop(t + 0.2);
+      }
+      later(bird, rand(2500, 7000));
+    }
+    function cricket(freq, rate) { // сверчок: высокий тон с трелью
+      if (!on || mode !== 'night') return;
+      const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = freq;
+      const am = ctx.createOscillator(); am.type = 'square'; am.frequency.value = rate;
+      const amG = ctx.createGain(); amG.gain.value = 0.5;
+      const g = ctx.createGain(); g.gain.value = 0;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 8;
+      am.connect(amG).connect(g.gain);
+      const t = ctx.currentTime, len = rand(0.5, 1.4);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.028, t + 0.05); g.gain.setValueAtTime(0.028, t + len - 0.05); g.gain.linearRampToValueAtTime(0.0001, t + len);
+      o.connect(bp).connect(g).connect(master); o.start(t); am.start(t); o.stop(t + len + 0.05); am.stop(t + len + 0.05);
+      later(() => cricket(freq, rate), len * 1000 + rand(300, 1600));
+    }
+    function stop() {
+      on = false; timers.forEach(clearTimeout); timers = [];
+      if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8); }
+      later(() => { nodes.forEach((n) => { try { n.stop(); } catch (e) { /* */ } }); nodes = []; if (ctx) ctx.suspend(); }, 900);
+    }
+    function start(theme) {
+      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.connect(ctx.destination); }
+      ctx.resume(); timers.forEach(clearTimeout); timers = []; nodes.forEach((n) => { try { n.stop(); } catch (e) { /* */ } }); nodes = [];
+      on = true; mode = theme;
+      master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(0.0001, ctx.currentTime); master.gain.linearRampToValueAtTime(1, ctx.currentTime + 1.2);
+      roomTone(); later(sawStroke, rand(3000, 8000)); later(shavings, rand(1500, 5000));
+      if (theme === 'day') { later(bird, 600); later(bird, 2400); }
+      else { later(() => cricket(4300, 26), 300); later(() => cricket(3900, 22), 900); later(() => cricket(4700, 30), 1600); }
+    }
+    return { start, stop, isOn: () => on, setMode: (t) => { if (on) start(t); } };
+  })();
+  if (soundBtn) {
+    const lbl = soundBtn.querySelector('.sound__lbl');
+    function setSound(state) {
+      soundBtn.setAttribute('aria-pressed', state ? 'true' : 'false');
+      soundBtn.classList.toggle('is-on', state);
+      lbl.textContent = state ? (root.dataset.theme === 'night' ? 'звук мастерской: ночь' : 'звук мастерской: день') : 'звук мастерской: выкл';
+      if (state) ambient.start(root.dataset.theme); else ambient.stop();
+      try { sessionStorage.setItem('bw-sound', state ? '1' : '0'); } catch (e) { /* */ }
+    }
+    soundBtn.addEventListener('click', () => setSound(!ambient.isOn()));
+    toggle.addEventListener('click', () => { if (ambient.isOn()) { ambient.setMode(root.dataset.theme); lbl.textContent = root.dataset.theme === 'night' ? 'звук мастерской: ночь' : 'звук мастерской: день'; } });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && ambient.isOn()) setSound(false); });
+  }
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {

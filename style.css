@@ -688,3 +688,52 @@ html.is-loading, html.is-locked { overflow: hidden; }
   .mat .pnote { position: static; display: block; margin-top: 12px; }
   .toast { flex-wrap: wrap; justify-content: center; text-align: center; }
 }
+
+/* =========================================================
+   ИНСТРУМЕНТЫ
+   ========================================================= */
+.tools__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lw); background: var(--line); border: var(--lw) solid var(--line); }
+.tool { background: var(--bg); padding: 22px 20px 26px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); }
+.tool__svg { width: 100%; height: auto; display: block; margin-bottom: 8px; }
+:root[data-theme="night"] .tool__svg { color: var(--accent); }
+.tool h3 { text-transform: uppercase; font-weight: 700; font-size: 1.3rem; letter-spacing: .02em; }
+.tool__meta { color: var(--ink); }
+.tool p:last-child { color: var(--ink-2); font-size: .95rem; }
+@media (max-width: 1100px) { .tools__grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .tools__grid { grid-template-columns: 1fr 1fr; } .tool { padding: 16px 14px 20px; } .tool h3 { font-size: 1.1rem; } }
+
+/* =========================================================
+   ТРИ ВОПРОСА ВМЕСТО ФОРМЫ
+   ========================================================= */
+.wizard { border-bottom: var(--lw) solid var(--line); background: var(--bg); position: relative; }
+.wizard__head { display: flex; align-items: flex-end; gap: 18px; padding: 22px var(--gutter) 14px; border-bottom: 1px dotted var(--line); }
+.wizard__title { text-transform: uppercase; font-weight: 700; font-size: clamp(1.2rem, 2.2vw, 1.8rem); letter-spacing: .02em; line-height: 1; }
+.wizard__step { margin-left: auto; }
+.wizard__body { padding: 26px var(--gutter) 30px; transition: opacity .22s var(--ease), transform .22s var(--ease); }
+.wizard.is-switching .wizard__body { opacity: 0; transform: translateY(6px); }
+.wizard__q { font-size: clamp(1.6rem, 2.6vw, 2.2rem); margin-bottom: 18px; }
+.wizard__opts { display: flex; flex-wrap: wrap; gap: var(--lw); }
+.wizard__opt { display: inline-flex; align-items: center; gap: 12px; padding: 14px 20px 14px 16px; border: var(--lw) solid var(--line); background: var(--bg); text-transform: uppercase; font-weight: 500; letter-spacing: .06em; font-size: .95rem; transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s, color .25s; }
+.wizard__opt .mono { color: var(--ink-2); }
+.wizard__opt:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--line); }
+.wizard__opt:active { transform: none; box-shadow: none; background: var(--accent); color: var(--accent-ink); }
+.wizard__text { font-size: clamp(1.4rem, 2.2vw, 1.9rem); max-width: 60ch; border-left: 3px solid var(--line); padding-left: 18px; margin-bottom: 20px; }
+.wizard__actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.wizard__reset { color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; }
+.wizard__trail { padding: 0 var(--gutter) 16px; min-height: 16px; }
+:root[data-theme="night"] .wizard__q, :root[data-theme="night"] .wizard__text { color: var(--accent); }
+@media (max-width: 600px) { .wizard__opt { width: 100%; } .wizard__head { flex-wrap: wrap; } }
+
+/* =========================================================
+   ЗВУК МАСТЕРСКОЙ, ОТКУДА ДЕРЕВО
+   ========================================================= */
+.sound { display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--line-soft); color: var(--ink-2); transition: border-color .3s, color .3s; }
+.sound:hover { border-color: var(--line); color: var(--ink); }
+.sound__bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+.sound__bars i { width: 2px; height: 25%; background: currentColor; }
+.sound.is-on { color: var(--ink); border-color: var(--line); }
+.sound.is-on .sound__bars i { animation: bar 1s ease-in-out infinite; }
+.sound.is-on .sound__bars i:nth-child(2) { animation-delay: .2s; } .sound.is-on .sound__bars i:nth-child(3) { animation-delay: .4s; } .sound.is-on .sound__bars i:nth-child(4) { animation-delay: .6s; }
+:root[data-theme="night"] .sound.is-on { color: var(--accent); border-color: var(--accent); }
+.modal__origin { margin-top: -8px; color: var(--ink-2); }
+.modal__origin::before { content: ""; display: inline-block; width: 14px; height: 1px; background: currentColor; margin-right: 8px; vertical-align: middle; }
