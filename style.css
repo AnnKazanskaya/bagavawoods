@@ -85,7 +85,7 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
 .ruler { height: 22px; overflow: hidden; color: var(--ink); opacity: .75; border-bottom: var(--lw) solid var(--line); }
 .ruler svg { display: block; }
 /* размерные линии */
-.dims { position: absolute; inset: 0; pointer-events: none; z-index: 2; color: var(--ink); }
+.dims { position: absolute; top: 0; left: 0; right: 0; height: clamp(320px, 60vh, 640px); pointer-events: none; z-index: 2; color: var(--ink); }
 .dims[hidden] { display: none; }
 .dim { position: absolute; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .06em; }
 .dim i { font-style: normal; background: var(--bg); padding: 2px 6px; border: 1px solid currentColor; position: absolute; white-space: nowrap; }
@@ -380,7 +380,7 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
 .modal.is-open .modal__box { transform: none; opacity: 1; }
 .modal__close { position: absolute; top: 10px; right: 10px; z-index: 3; width: 44px; height: 44px; display: grid; place-items: center; background: var(--bg); border: var(--lw) solid var(--line); }
 .modal__close:hover { background: var(--accent); color: var(--accent-ink); }
-.modal__gallery { display: flex; flex-direction: column; border-right: var(--lw) solid var(--line); }
+.modal__gallery { display: flex; flex-direction: column; border-right: var(--lw) solid var(--line); position: relative; }
 .modal__stage { position: relative; height: clamp(320px, 60vh, 640px); }
 .modal__stage .swap { position: absolute; inset: 0; }
 .modal__thumbs { display: flex; gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
@@ -463,6 +463,7 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
   .modal__box { grid-template-columns: 1fr; max-height: calc(100dvh - 32px); }
   .modal__gallery { border-right: 0; border-bottom: var(--lw) solid var(--line); }
   .modal__stage { height: 48vh; }
+  .dims { height: 48vh; }
   .modal__thumb { height: 70px; }
 }
 @media (max-width: 600px) {
@@ -513,28 +514,20 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
 :root[data-theme="night"] .hero__draft { color: var(--accent); }
 
 /* технические рисунки товаров */
-.swap__draw { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 6%; background: var(--bg); opacity: 0; transition: opacity .45s var(--ease); z-index: 2; mix-blend-mode: multiply; }
-:root[data-theme="night"] .swap__draw { mix-blend-mode: normal; filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
+.swap__draw { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 6%; background: #fff; opacity: 0; transition: opacity .45s var(--ease); z-index: 2; }
+:root[data-theme="night"] .swap__draw { background: var(--bg); filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
 @media (hover: hover) { .card__btn:hover .swap__draw { opacity: 1; } }
 .card__photo .swap__draw ~ * { }
-.modal__stage.is-draw { background: var(--bg); }
-.stage__draw { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 4%; mix-blend-mode: multiply; }
-:root[data-theme="night"] .stage__draw { mix-blend-mode: normal; filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
-.modal__thumb--draw { display: grid; place-items: center; background: var(--bg); }
-.modal__thumb--draw img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 8px; mix-blend-mode: multiply; }
-:root[data-theme="night"] .modal__thumb--draw img { mix-blend-mode: normal; filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
+.modal__stage.is-draw { background: #fff; }
+:root[data-theme="night"] .modal__stage.is-draw { background: var(--bg); }
+.stage__draw { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 4%; }
+:root[data-theme="night"] .stage__draw { filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
+.modal__thumb--draw { display: grid; place-items: center; background: #fff; }
+:root[data-theme="night"] .modal__thumb--draw { background: var(--bg); }
+.modal__thumb--draw img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+:root[data-theme="night"] .modal__thumb--draw img { filter: invert(1) sepia(1) saturate(1.5) brightness(.85); }
 .modal__thumb--draw .mono { position: absolute; left: 6px; bottom: 4px; font-size: .55rem; background: var(--bg); padding: 1px 4px; }
 
-/* курсор-перекрестие */
-.xhair { position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0; transition: opacity .3s; color: var(--ink); }
-.xhair.is-on { opacity: 1; }
-.xhair.is-hidden { opacity: 0; }
-.xhair__v, .xhair__h { position: absolute; left: 0; top: 0; background: currentColor; opacity: .28; }
-.xhair__v { width: 1px; height: 100vh; }
-.xhair__h { height: 1px; width: 100vw; }
-.xhair__lbl { position: absolute; left: 0; top: 0; font-size: .58rem; letter-spacing: .12em; color: var(--ink); background: var(--bg); padding: 2px 6px; border: 1px solid var(--line-soft); white-space: pre; font-weight: 400; }
-:root[data-theme="night"] .xhair { color: var(--accent); }
-@media (pointer: coarse) { .xhair { display: none; } }
 
 /* прелоадер «лист чертежа» */
 .loader { position: fixed; inset: 0; z-index: 200; background: var(--bg); color: var(--ink); display: grid; place-items: center; transition: opacity .5s var(--ease), visibility 0s .5s; }
@@ -558,4 +551,19 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
   .hero__draw svg, .hero__draw svg * { stroke-width: 2px; }
   .hero__draw svg [opacity] { opacity: .8; }
   .dovetail, .dovetail * { stroke-width: 1.8px; }
+}
+/* телефон: нижний ряд hero в одну колонку, ласточкин хвост на всю ширину */
+@media (max-width: 600px) {
+  .hero__bottom { grid-template-columns: 1fr; }
+  .hero__index { order: 3; border-right: 0; border-bottom: var(--lw) solid var(--line); flex-direction: row; align-items: center; gap: 14px; padding-top: 18px; padding-bottom: 18px; }
+  .hero__index .num::before { display: none; }
+  .hero__index .ico { margin-left: auto; }
+  .hero__draft { order: 4; min-height: 0; padding-top: 34px; padding-bottom: 30px; }
+  .dovetail { max-width: 300px; }
+  .hero__draft-labels { inset: 12px var(--gutter); }
+  .hero__draft-t { top: 0; }
+  .hero__draft-b { display: none; }
+  .hero__draft-a { bottom: 6px; left: 62%; }
+  .hero__draw svg, .hero__draw svg * { stroke-width: 2.6px; }
+  .dovetail, .dovetail * { stroke-width: 2.2px; }
 }

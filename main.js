@@ -305,30 +305,6 @@
   if (document.fonts) document.fonts.ready.then(drawLeaders);
   addEventListener('load', drawLeaders);
 
-  /* ---------- курсор-перекрестие с координатами ---------- */
-  const xh = document.getElementById('xhair');
-  if (xh && matchMedia('(pointer: fine)').matches && !reduceMotion) {
-    const v = xh.querySelector('.xhair__v'), hz = xh.querySelector('.xhair__h'), lbl = xh.querySelector('.xhair__lbl');
-    let mx = -1, my = -1, raf = 0;
-    const pad = (n) => String(Math.round(n)).padStart(4, '0');
-    function tick() {
-      raf = 0;
-      v.style.transform = `translateX(${mx}px)`;
-      hz.style.transform = `translateY(${my}px)`;
-      lbl.style.transform = `translate(${mx + 14}px, ${my + 14}px)`;
-      lbl.textContent = `x ${pad(mx)}  y ${pad(my + scrollY)}`;
-    }
-    document.addEventListener('mousemove', (e) => {
-      mx = e.clientX; my = e.clientY;
-      xh.classList.add('is-on');
-      if (!raf) raf = requestAnimationFrame(tick);
-    });
-    document.addEventListener('mouseleave', () => xh.classList.remove('is-on'));
-    document.addEventListener('mouseover', (e) => {
-      xh.classList.toggle('is-hidden', !!e.target.closest('a, button, .modal'));
-    });
-  }
-
   /* ---------- прелоадер «лист чертежа» ---------- */
   const loader = document.getElementById('loader');
   let seen = false; try { seen = sessionStorage.getItem('bw-sheet') === '1'; } catch (e) { /* */ }
