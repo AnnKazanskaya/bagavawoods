@@ -401,7 +401,7 @@
     loaderDone.then(() => {
       ['wheel', 'touchmove', 'keydown'].forEach((ev) => addEventListener(ev, onIntent, { passive: true }));
       roll.addEventListener('click', unroll);
-      setTimeout(unroll, 9000); // если никто не скроллит, разворачиваем сами
+      setTimeout(unroll, 5000); // если 5 секунд нет действий, разворачиваем сами
     });
   } else if (roll) { roll.remove(); }
 
