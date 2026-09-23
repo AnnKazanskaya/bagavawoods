@@ -446,8 +446,10 @@
   }
 
   /* ---------- образцы пород: тап на телефоне ---------- */
+  const touchOnly = matchMedia('(hover: none)').matches;
   document.querySelectorAll('.sample').forEach((s) => {
     s.addEventListener('click', () => {
+      if (!touchOnly) return;
       const card = s.closest('.mat');
       document.querySelectorAll('.mat.is-open').forEach((c) => { if (c !== card) c.classList.remove('is-open'); });
       card.classList.toggle('is-open');
