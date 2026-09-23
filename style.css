@@ -553,3 +553,9 @@ u { text-decoration: none; border-bottom: 1.5px solid currentColor; }
   .hero__draw-t { top: -16px; }
   .swap__draw { display: none; }
 }
+/* на маленьких экранах чертёж масштабируется, линии делаем толще */
+@media (max-width: 900px) {
+  .hero__draw svg, .hero__draw svg * { stroke-width: 2px; }
+  .hero__draw svg [opacity] { opacity: .8; }
+  .dovetail, .dovetail * { stroke-width: 1.8px; }
+}

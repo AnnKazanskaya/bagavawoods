@@ -272,13 +272,13 @@
       if (el.dataset.fill) el.style.fillOpacity = '1';
     });
   }
-  if (!reduceMotion) {
-    const svgs = [...document.querySelectorAll('svg.draw')];
-    svgs.forEach(prepDraw);
+  const drawSvgs = reduceMotion ? [] : [...document.querySelectorAll('svg.draw')];
+  drawSvgs.forEach(prepDraw);
+  function armDraw() {
     const dio = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) { playDraw(en.target, 1800); dio.unobserve(en.target); } });
-    }, { threshold: 0.25 });
-    svgs.forEach((s) => dio.observe(s));
+      entries.forEach((en) => { if (en.isIntersecting) { playDraw(en.target, 1600); dio.unobserve(en.target); } });
+    }, { threshold: 0.2 });
+    drawSvgs.forEach((s) => dio.observe(s));
   }
 
   /* ---------- выноски на фото: линия всегда упирается в рамку ---------- */
@@ -347,7 +347,8 @@
     setTimeout(() => loader.classList.add('is-text'), 900);
     setTimeout(() => { loader.classList.add('is-done'); try { sessionStorage.setItem('bw-sheet', '1'); } catch (e) { /* */ } }, 1750);
     setTimeout(() => loader.remove(), 2400);
-  } else if (loader) { loader.remove(); }
+    setTimeout(armDraw, 1700);
+  } else { if (loader) loader.remove(); armDraw(); }
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {
