@@ -8,6 +8,7 @@
   const PRODUCTS = [
     {
       id: 'table',
+      line: 'Живая форма. Натуральный характер.',
       cat: 'Столы',
       num: '01',
       title: 'Журнальный столик «Природа»',
@@ -23,6 +24,7 @@
     },
     {
       id: 'tv',
+      line: 'Функциональность. Чистые линии.',
       cat: 'Мебель',
       num: '02',
       title: 'Тумба под телевизор',
@@ -37,6 +39,7 @@
     },
     {
       id: 'lamp',
+      line: 'Свет сквозь текстуру дуба.',
       cat: 'Свет',
       num: '03',
       title: 'Лампа из массива сосны и дуба',
@@ -51,6 +54,7 @@
     },
     {
       id: 'shelf',
+      line: 'Необычные формы. Смелые решения.',
       cat: 'Полки',
       num: '04',
       title: 'Навесная полка «Петля»',
@@ -66,6 +70,7 @@
     },
     {
       id: 'stand',
+      line: 'Дуб для всего, что звучит.',
       cat: 'Мебель',
       num: '05',
       title: 'Стойка для аудиоаппаратуры',
@@ -80,6 +85,7 @@
     },
     {
       id: 'amber',
+      line: 'Детали, создающие атмосферу.',
       cat: 'Свет',
       num: '06',
       title: 'Лампы «Янтарь»',
@@ -148,7 +154,7 @@
         <span class="card__head">
           <span class="num">${p.num}</span>
           <span class="card__cat">${p.cat}</span>
-          <span class="card__hint mono">смотреть</span>
+          <span class="card__line mono">${p.line}</span>
         </span>
         <span class="card__photo">${swapImg(p.day[0], p.night[0], p.alt, true, p.pos)}</span>
         <span class="card__foot">
@@ -227,5 +233,5 @@
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
   }, { threshold: 0.05, rootMargin: '0px 0px -5% 0px' });
-  document.querySelectorAll('.section__head, .about__grid, .works__grid, .steps, .materials__grid, .contact__grid').forEach((el) => { el.classList.add('reveal'); io.observe(el); });
+  document.querySelectorAll('.section__head, .about__grid, .works__grid, .steps, .materials__grid, .order__grid').forEach((el) => { el.classList.add('reveal'); io.observe(el); });
 })();
