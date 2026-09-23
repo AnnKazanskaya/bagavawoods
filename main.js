@@ -8,6 +8,7 @@
   const PRODUCTS = [
     {
       id: 'table',
+      smell: 'дуб, мокрый камень, трава после дождя',
       draw: 'img/draw-table.webp',
       line: 'Живая форма. Натуральный характер.',
       cat: 'Столы',
@@ -25,6 +26,7 @@
     },
     {
       id: 'tv',
+      smell: 'дуб, тёплое масло, воск',
       draw: 'img/draw-tv.webp',
       line: 'Функциональность. Чистые линии.',
       cat: 'Мебель',
@@ -41,6 +43,7 @@
     },
     {
       id: 'lamp',
+      smell: 'смола, сосна, нагретое дерево',
       draw: 'img/draw-lamp.webp',
       line: 'Свет сквозь текстуру дуба.',
       cat: 'Свет',
@@ -57,6 +60,8 @@
     },
     {
       id: 'shelf',
+      note: 'клиент просил ниже, сделали 160',
+      smell: 'сосновая смола, мох, лес',
       draw: 'img/draw-shelf.webp',
       line: 'Необычные формы. Смелые решения.',
       cat: 'Полки',
@@ -74,6 +79,7 @@
     },
     {
       id: 'stand',
+      smell: 'дуб, воск, немного пыли от винила',
       draw: 'img/draw-stand.webp',
       line: 'Дуб для всего, что звучит.',
       cat: 'Мебель',
@@ -90,6 +96,7 @@
     },
     {
       id: 'amber',
+      smell: 'дуб, тёплый воск, свет',
       draw: 'img/draw-amber.webp',
       line: 'Детали, создающие атмосферу.',
       cat: 'Свет',
@@ -167,6 +174,7 @@
           <span class="card__caption">
             <span class="card__title">${p.title}</span>
             <span class="card__tag mono">${p.tag}</span>
+            ${p.note ? `<span class="pnote hand">${p.note}</span>` : ''}
           </span>
           <span class="card__plus" aria-hidden="true">+</span>
         </span>
@@ -195,6 +203,7 @@
     document.getElementById('modalNum').textContent = p.num + ' / ' + p.tag;
     document.getElementById('modalTitle').textContent = p.title;
     document.getElementById('modalLead').textContent = p.lead;
+    document.getElementById('modalSmell').textContent = 'пахнет: ' + p.smell;
     document.getElementById('modalSpecs').innerHTML = p.specs.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
     const feat = document.getElementById('modalFeat');
     feat.innerHTML = p.feat.map((f) => `<li>${f}</li>`).join('');
@@ -236,14 +245,23 @@
     if (p) openModal(p);
   });
   modal.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeModal(); });
+  function stepSlide(dir) {
+    if (!current) return;
+    const n = current.day.length + 1;
+    const active = [...thumbs.children].findIndex((t) => t.classList.contains('is-active'));
+    renderStage(current, (active + dir + n) % n);
+  }
+  let tx = 0, ty = 0, tt = 0;
+  stage.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now(); }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Date.now() - tt < 600 && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) stepSlide(dx < 0 ? 1 : -1);
+  }, { passive: true });
   document.addEventListener('keydown', (e) => {
     if (modal.hidden) return;
     if (e.key === 'Escape') closeModal();
-    if (current && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-      const n = current.day.length + 1;
-      const active = [...thumbs.children].findIndex((t) => t.classList.contains('is-active'));
-      renderStage(current, (active + (e.key === 'ArrowRight' ? 1 : n - 1)) % n);
-    }
+    if (e.key === 'ArrowRight') stepSlide(1);
+    if (e.key === 'ArrowLeft') stepSlide(-1);
   });
 
   /* ---------- «плоттер»: прочерчивание линий ---------- */
@@ -305,26 +323,137 @@
   if (document.fonts) document.fonts.ready.then(drawLeaders);
   addEventListener('load', drawLeaders);
 
-  /* ---------- прелоадер «лист чертежа» ---------- */
+  /* ---------- прелоадер: заполняемый спил ---------- */
   const loader = document.getElementById('loader');
   let seen = false; try { seen = sessionStorage.getItem('bw-sheet') === '1'; } catch (e) { /* */ }
-  if (loader && !seen && !reduceMotion) {
-    const W = innerWidth, H = innerHeight, m = Math.round(Math.min(W, H) * 0.045);
-    const sw = Math.min(360, W - 2 * m - 20), sh = 70, sx = W - m - sw, sy = H - m - sh;
+  const firstVisit = !seen && !reduceMotion;
+  let loaderDone = Promise.resolve();
+  if (loader && firstVisit) {
+    root.classList.add('is-loading');
+    const W = innerWidth, H = innerHeight, mg = Math.round(Math.min(W, H) * 0.045);
     const svg = document.getElementById('loaderSvg');
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg.innerHTML = `<rect x="${m}" y="${m}" width="${W - 2 * m}" height="${H - 2 * m}"/>
-      <rect x="${sx}" y="${sy}" width="${sw}" height="${sh}"/>
-      <path d="M${sx} ${sy + sh / 2}H${sx + sw}"/><path d="M${sx + sw * .34} ${sy}V${sy + sh}"/><path d="M${sx + sw * .68} ${sy}V${sy + sh}"/>
-      <path d="M${m + 18} ${m + 18}h40M${m + 18} ${m + 18}v40"/><path d="M${W - m - 18} ${H - m - 18}h-40M${W - m - 18} ${H - m - 18}v-40"/>
-      <path d="M${W / 2 - 60} ${H / 2}h120M${W / 2} ${H / 2 - 60}v120"/>`;
-    prepDraw(svg);
-    requestAnimationFrame(() => playDraw(svg, 900));
-    setTimeout(() => loader.classList.add('is-text'), 900);
-    setTimeout(() => { loader.classList.add('is-done'); try { sessionStorage.setItem('bw-sheet', '1'); } catch (e) { /* */ } }, 1750);
-    setTimeout(() => loader.remove(), 2400);
-    setTimeout(armDraw, 1700);
+    svg.innerHTML = `<rect x="${mg}" y="${mg}" width="${W - 2 * mg}" height="${H - 2 * mg}"/>
+      <path d="M${mg + 16} ${mg + 16}h36M${mg + 16} ${mg + 16}v36"/><path d="M${W - mg - 16} ${H - mg - 16}h-36M${W - mg - 16} ${H - mg - 16}v-36"/>
+      <path d="M${W - mg - 16} ${mg + 16}h-36M${W - mg - 16} ${mg + 16}v36"/><path d="M${mg + 16} ${H - mg - 16}h36M${mg + 16} ${H - mg - 16}v-36"/>`;
+    prepDraw(svg); requestAnimationFrame(() => playDraw(svg, 700));
+    // копия спила из подвала, кольца проявляются от сердцевины к коре
+    const src = document.querySelector('.rings-svg');
+    const ringsBox = document.getElementById('loaderRings');
+    const rsvg = src.cloneNode(true); rsvg.classList.remove('draw'); rsvg.removeAttribute('class'); rsvg.setAttribute('class', 'loader__rings-svg');
+    ringsBox.appendChild(rsvg);
+    const ringEls = [...rsvg.children]; ringEls.forEach((el) => { el.style.strokeDasharray = ''; el.style.strokeDashoffset = ''; el.style.transition = ''; el.style.fillOpacity = ''; el.style.opacity = '0'; });
+    const pct = document.getElementById('loaderPct');
+    let progress = 0, loaded = false, shownPrev = -1, t0 = performance.now(), tLoaded = 0;
+    addEventListener('load', () => { loaded = true; });
+    const ease = (x) => 1 - Math.pow(1 - x, 3);
+    const finish = new Promise((resolve) => {
+      function frame(now) {
+        const t = (now - t0) / 1000;
+        if ((loaded || t > 1.9) && !tLoaded) tLoaded = t;
+        // до 90 % за 1,4 с, дальше ждём загрузку (максимум до 1,9 с), потом добираем до 100 % за 0,4 с
+        progress = tLoaded ? 0.9 + 0.1 * Math.min(1, (t - tLoaded) / 0.4) : 0.9 * ease(Math.min(1, t / 1.4));
+        const shown = Math.round(progress * ringEls.length);
+        if (shown !== shownPrev) { ringEls.forEach((el, i) => { el.style.opacity = i < shown ? '1' : '0'; }); shownPrev = shown; }
+        pct.textContent = String(Math.round(progress * 100)).padStart(2, '0') + ' %';
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
+          setTimeout(() => { loader.classList.add('is-done'); root.classList.remove('is-loading'); try { sessionStorage.setItem('bw-sheet', '1'); } catch (e) { /* */ } resolve(); }, 350);
+          setTimeout(() => loader.remove(), 1100);
+        }
+      }
+      requestAnimationFrame(frame);
+    });
+    loaderDone = finish;
+    finish.then(() => setTimeout(armDraw, 300));
   } else { if (loader) loader.remove(); armDraw(); }
+
+  /* ---------- рулон: лист разворачивается при первой прокрутке ---------- */
+  const hero = document.querySelector('.hero');
+  const roll = document.getElementById('roll');
+  let rolled = false; try { rolled = sessionStorage.getItem('bw-roll') === '1'; } catch (e) { /* */ }
+  if (hero && roll && !rolled && !reduceMotion && matchMedia('(min-width: 600px)').matches) {
+    hero.classList.add('is-rolled');
+    root.classList.add('is-locked');
+    let started = false;
+    function unroll() {
+      if (started) return; started = true;
+      hero.classList.add('is-unrolling');
+      setTimeout(() => {
+        hero.classList.remove('is-rolled', 'is-unrolling');
+        root.classList.remove('is-locked');
+        roll.remove();
+        try { sessionStorage.setItem('bw-roll', '1'); } catch (e) { /* */ }
+        drawLeaders();
+      }, 1500);
+      ['wheel', 'touchmove', 'keydown'].forEach((ev) => removeEventListener(ev, onIntent));
+    }
+    function onIntent(e) { if (e.type === 'keydown' && !['ArrowDown', 'PageDown', ' ', 'End'].includes(e.key)) return; unroll(); }
+    loaderDone.then(() => {
+      ['wheel', 'touchmove', 'keydown'].forEach((ev) => addEventListener(ev, onIntent, { passive: true }));
+      roll.addEventListener('click', unroll);
+      setTimeout(unroll, 9000); // если никто не скроллит, разворачиваем сами
+    });
+  } else if (roll) { roll.remove(); }
+
+  /* ---------- опилки при клике на «заказать» ---------- */
+  let dustDone = false;
+  function sawdust(x, y) {
+    if (dustDone || reduceMotion) return; dustDone = true;
+    const colors = ['#c9a252', '#a8783a', '#e0c48a', '#8b5e2b', '#d9b26a'];
+    for (let i = 0; i < 26; i++) {
+      const p = document.createElement('i');
+      p.className = 'dust';
+      const w = 3 + Math.random() * 6, hgt = 1.5 + Math.random() * 2.5;
+      p.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${hgt}px;background:${colors[i % colors.length]}`;
+      document.body.appendChild(p);
+      const ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.4, sp = 90 + Math.random() * 160;
+      const vx = Math.cos(ang) * sp, vy = Math.sin(ang) * sp;
+      p.animate([
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${vx * .6}px, ${vy * .6 + 40}px) rotate(${180 + Math.random() * 360}deg)`, opacity: 1, offset: .5 },
+        { transform: `translate(${vx}px, ${vy + 220}px) rotate(${360 + Math.random() * 360}deg)`, opacity: 0 }
+      ], { duration: 800 + Math.random() * 400, easing: 'cubic-bezier(.2,.6,.4,1)', fill: 'forwards' }).onfinish = () => p.remove();
+    }
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.order__cta, .order__link, #modalOrder, .order__handle');
+    if (b) sawdust(e.clientX, e.clientY);
+  });
+
+  /* ---------- голос мастера ---------- */
+  const voiceBtn = document.getElementById('voiceBtn'), voice = document.getElementById('voice');
+  if (voiceBtn && voice) {
+    voiceBtn.addEventListener('click', () => {
+      if (voice.paused) { voice.play(); voiceBtn.classList.add('is-playing'); }
+      else { voice.pause(); voice.currentTime = 0; voiceBtn.classList.remove('is-playing'); }
+    });
+    voice.addEventListener('ended', () => voiceBtn.classList.remove('is-playing'));
+  }
+
+  /* ---------- вечером предлагаем ночь ---------- */
+  const toast = document.getElementById('toast');
+  if (toast) {
+    let stored = null, asked = false;
+    try { stored = localStorage.getItem('bw-theme'); asked = sessionStorage.getItem('bw-asked') === '1'; } catch (e) { /* */ }
+    const hr = new Date().getHours();
+    if (!stored && !asked && (hr >= 20 || hr < 6) && root.dataset.theme === 'day') {
+      loaderDone.then(() => setTimeout(() => { toast.hidden = false; requestAnimationFrame(() => toast.classList.add('is-on')); }, 2500));
+      const hide = () => { toast.classList.remove('is-on'); setTimeout(() => { toast.hidden = true; }, 400); try { sessionStorage.setItem('bw-asked', '1'); } catch (e) { /* */ } };
+      toast.querySelector('[data-yes]').addEventListener('click', () => { applyTheme('night', true); hide(); });
+      toast.querySelector('[data-no]').addEventListener('click', hide);
+    }
+  }
+
+  /* ---------- образцы пород: тап на телефоне ---------- */
+  document.querySelectorAll('.sample').forEach((s) => {
+    s.addEventListener('click', () => {
+      const card = s.closest('.mat');
+      document.querySelectorAll('.mat.is-open').forEach((c) => { if (c !== card) c.classList.remove('is-open'); });
+      card.classList.toggle('is-open');
+    });
+  });
+  document.querySelectorAll('.mat__tex').forEach((t) => t.addEventListener('click', () => t.closest('.mat').classList.remove('is-open')));
 
   /* ---------- rulers ---------- */
   function buildRuler(el) {

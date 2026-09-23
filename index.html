@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=16">
 <script>
   (function(){try{var t=localStorage.getItem('bw-theme');if(!t){t='day';}document.documentElement.dataset.theme=t;}catch(e){}})();
 </script>
@@ -17,8 +17,17 @@
 <body>
 <div class="grain" aria-hidden="true"></div>
 <div class="loader" id="loader" aria-hidden="true">
-  <svg class="loader__svg" id="loaderSvg" fill="none" stroke="currentColor" stroke-width="1.5"></svg>
-  <div class="loader__txt mono">bagavawoods · лист 1 / 1 · формат A1</div>
+  <svg class="loader__frame" id="loaderSvg" fill="none" stroke="currentColor" stroke-width="1.5"></svg>
+  <div class="loader__core">
+    <div class="loader__rings" id="loaderRings"></div>
+    <div class="loader__txt mono"><span>загрузка</span><b id="loaderPct">00 %</b></div>
+    <div class="loader__sub mono">bagavawoods · лист 1 / 1</div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden>
+  <span class="hand">Уже темно. Включить ночь?</span>
+  <button type="button" class="toast__btn" data-yes>да</button>
+  <button type="button" class="toast__btn" data-no>нет</button>
 </div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -65,6 +74,7 @@
 <main class="frame">
 <!-- ================= HERO ================= -->
 <section class="hero" aria-labelledby="heroTitle">
+  <div class="roll" id="roll" aria-hidden="true"><span class="roll__bar"></span><span class="roll__hint mono">прокрутите, чтобы развернуть лист</span></div>
   <div class="hero__title-wrap cell">
     <h1 class="hero__title" id="heroTitle">
       <span class="hero__line">Столярная</span>
@@ -129,6 +139,12 @@
       <p class="hand">Привет, я Ильшат.<br>Мне 21 год.<br>Берусь за то, от чего другие отказываются: сложные конструкции, необычные формы, <u>смелые идеи.</u></p>
       <span class="hand hero__sign">Ильшат.</span>
       <span class="dots dots--col" aria-hidden="true"></span>
+      <button class="voice" id="voiceBtn" type="button" aria-label="Послушать голос мастера">
+        <svg class="voice__play" viewBox="0 0 24 24" width="14" height="14"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>
+        <span class="voice__bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="mono">послушать</span>
+      </button>
+      <audio id="voice" src="audio/voice.mp3" preload="none"></audio>
     </div>
   </div>
 
@@ -195,6 +211,7 @@
     <div class="about__text">
       <p class="lead">BAGAVAWOODS: небольшая мастерская, где вещи делаются руками и&nbsp;от&nbsp;начала до&nbsp;конца одним человеком. Никакой имитации: только массив, натуральные покрытия и&nbsp;честные соединения.</p>
       <p>Я&nbsp;люблю задачи, которые не&nbsp;решаются по&nbsp;шаблону: гнутая полка-петля, столик на&nbsp;цельном валуне, лампа, у&nbsp;которой светится сама текстура дуба. Если у&nbsp;вас есть идея, которую «нельзя сделать», напишите мне.</p>
+      <span class="pnote hand">доска сама подсказывает форму, надо только слушать</span>
     </div>
     <ul class="principles" role="list">
       <li>
@@ -251,11 +268,13 @@
       <span class="steps__n">02</span>
       <h3>Эскиз и расчёт</h3>
       <p>Рисую изделие, считаю стоимость и сроки. Согласовываем детали до первого реза.</p>
+      <span class="pnote hand">эскиз всегда от руки, потом уже в размер</span>
     </li>
     <li class="steps__item">
       <span class="steps__n">03</span>
       <h3>Изготовление</h3>
       <p>Подбираю доску, делаю, шлифую, покрываю маслом и воском. Присылаю фото в процессе.</p>
+      <span class="pnote hand">сушить 2 недели, не торопить</span>
     </li>
     <li class="steps__item">
       <span class="steps__n">04</span>
@@ -273,16 +292,81 @@
     <h2 class="section__title" id="materialsTitle">Материалы</h2>
     <span class="dots dots--sm section__dots" aria-hidden="true"></span>
   </header>
+  <div class="aa" aria-label="Разрез доски А-А">
+    <div class="aa__head">
+      <span class="aa__title">А-А</span>
+      <span class="mono">разрез доски · 2:1 · покрытие в три слоя</span>
+    </div>
+    <div class="aa__fig">
+    <svg class="aa__svg draw" viewBox="0 0 640 210" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round">
+      <!-- линии сечения -->
+      <path d="M40 30v22M600 30v22" stroke-width="2.4"/><path d="M28 36h24M588 36h24" stroke-width="2.4"/>
+      <!-- доска -->
+      <rect x="40" y="70" width="560" height="100" stroke-width="1.8"/>
+      <!-- воск -->
+      <path d="M40 76H600" stroke-width="1"/>
+      <path d="M48 73h4M60 73h4M72 73h4M84 73h4M96 73h4M108 73h4M120 73h4M132 73h4M144 73h4M156 73h4M168 73h4M180 73h4M192 73h4M204 73h4M216 73h4M228 73h4M240 73h4M252 73h4M264 73h4M276 73h4M288 73h4M300 73h4M312 73h4M324 73h4M336 73h4M348 73h4M360 73h4M372 73h4M384 73h4M396 73h4M408 73h4M420 73h4M432 73h4M444 73h4M456 73h4M468 73h4M480 73h4M492 73h4M504 73h4M516 73h4M528 73h4M540 73h4M552 73h4M564 73h4M576 73h4M588 73h4" stroke-width="1.6"/>
+      <!-- масло, пропитка -->
+      <path d="M40 92H600" stroke-width="1" stroke-dasharray="2 3"/>
+      <path d="M52 82l3 4M70 86l3 4M88 80l3 4M106 85l3 4M124 81l3 4M142 87l3 4M160 82l3 4M178 85l3 4M196 80l3 4M214 86l3 4M232 82l3 4M250 85l3 4M268 81l3 4M286 87l3 4M304 82l3 4M322 85l3 4M340 80l3 4M358 86l3 4M376 82l3 4M394 85l3 4M412 81l3 4M430 87l3 4M448 82l3 4M466 85l3 4M484 80l3 4M502 86l3 4M520 82l3 4M538 85l3 4M556 81l3 4M574 87l3 4M590 83l3 4" stroke-width="1" opacity=".7"/>
+      <!-- массив: годовые слои (поперечный разрез по ГОСТ 2.306) -->
+      <g stroke-width="1" opacity=".75">
+        <path d="M40 168c120-40 240-40 360-8 60 16 120 20 200 10"/>
+        <path d="M40 156c110-36 220-38 340-10 62 14 130 18 220 8"/>
+        <path d="M40 144c100-32 200-34 320-12 64 12 140 16 240 6"/>
+        <path d="M40 132c92-28 184-30 300-14 66 10 150 14 260 4"/>
+        <path d="M40 120c84-24 168-26 280-16 68 8 160 12 280 2"/>
+        <path d="M40 108c76-20 152-22 260-16 70 6 170 10 300 0"/>
+        <path d="M40 98c66-14 132-16 240-14 72 4 180 8 320-2"/>
+      </g>
+      <!-- выноски -->
+      <path d="M600 73h30M630 73v-40h4" /><circle cx="600" cy="73" r="2" fill="currentColor" stroke="none"/>
+      <path d="M600 84h30M630 84v-14" /><circle cx="600" cy="84" r="2" fill="currentColor" stroke="none"/>
+      <path d="M600 130h30M630 130v16h4" /><circle cx="600" cy="130" r="2" fill="currentColor" stroke="none"/>
+      <!-- размер толщины -->
+      <path d="M14 70h18M14 170h18M22 70v100"/><path d="M18 74l4-4 4 4M18 166l4 4 4-4"/>
+    </svg>
+    <div class="aa__labels mono">
+      <span class="aa__l1">воск · 0,1 мм</span>
+      <span class="aa__l2">масло · пропитка 1–2 мм</span>
+      <span class="aa__l3">массив · без плёнки</span>
+      <span class="aa__l4">40</span>
+      <span class="aa__la">А</span><span class="aa__lb">А</span>
+    </div>
+    </div>
+    <p class="aa__legend mono">воск 0,1 мм · масло, пропитка 1–2 мм · массив без плёнки · толщина 40</p>
+  </div>
+
   <div class="materials__grid">
-    <article class="mat">
+    <article class="mat mat--tex">
       <h3>Дуб</h3>
       <p class="mono mat__tag">массив • твёрдый • тяжёлый</p>
       <p>Основа для мебели, которая переживёт хозяев. Плотная текстура, глубокий цвет после масла.</p>
+      <button class="sample sample--oak" type="button" aria-label="Образец дуба, показать текстуру"><span class="mono">образец</span></button>
+      <div class="mat__tex mat__tex--oak">
+        <div class="mat__tex-txt">
+          <b>Дуб</b>
+          <span><i>пахнет</i> сухая кора, чуть дым</span>
+          <span><i>вес</i> около 700 кг/м³, тяжёлый</span>
+          <span><i>после масла</i> тёплый мёд, тёмные поры</span>
+        </div>
+      </div>
+      <span class="pnote hand">тут лучше дуб</span>
     </article>
-    <article class="mat">
+    <article class="mat mat--tex">
       <h3>Сосна</h3>
       <p class="mono mat__tag">массив • светлый • живой</p>
       <p>Тёплый, лёгкий, с характерными сучками. Идёт на полки, основания ламп и гнутые формы.</p>
+      <button class="sample sample--pine" type="button" aria-label="Образец сосны, показать текстуру"><span class="mono">образец</span></button>
+      <div class="mat__tex mat__tex--pine">
+        <div class="mat__tex-txt">
+          <b>Сосна</b>
+          <span><i>пахнет</i> смола, хвоя, тёплое дерево</span>
+          <span><i>вес</i> около 500 кг/м³, лёгкая</span>
+          <span><i>после масла</i> золотистая, сучки темнеют</span>
+        </div>
+      </div>
+      <span class="pnote hand">сучки оставляю, это характер</span>
     </article>
     <article class="mat">
       <h3>Масло + воск</h3>
@@ -365,6 +449,7 @@
       <span class="mono" id="modalNum"></span>
       <h3 id="modalTitle"></h3>
       <p id="modalLead"></p>
+      <p class="modal__smell mono" id="modalSmell"></p>
       <dl class="specs" id="modalSpecs"></dl>
       <ul class="feat" id="modalFeat" role="list"></ul>
       <a class="btn" id="modalOrder" href="https://t.me/bagavawoodsmaster" target="_blank" rel="noopener">Заказать в Telegram <svg class="ico" width="18" height="18"><use href="#i-chev"/></svg></a>
@@ -372,6 +457,6 @@
   </div>
 </div>
 
-<script src="main.js?v=8"></script>
+<script src="main.js?v=12"></script>
 </body>
 </html>
