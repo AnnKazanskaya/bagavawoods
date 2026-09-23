@@ -309,8 +309,7 @@
   }
 
   /* ---------- выноски на фото: линия всегда упирается в рамку ---------- */
-  const leaders = document.getElementById('leaders');
-  function drawLeaders() {
+  function drawLeadersIn(leaders) {
     if (!leaders) return;
     const fig = leaders.parentElement;
     const W = fig.clientWidth, H = fig.clientHeight;
@@ -327,6 +326,7 @@
     });
     leaders.innerHTML = s;
   }
+  function drawLeaders() { document.querySelectorAll('.leaders').forEach(drawLeadersIn); }
   drawLeaders();
   addEventListener('resize', drawLeaders);
   if (document.fonts) document.fonts.ready.then(drawLeaders);
