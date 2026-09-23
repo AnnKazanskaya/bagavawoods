@@ -531,11 +531,14 @@
   /* ---------- звук мастерской: настоящие записи, зацикленные ---------- */
   const soundBtn = document.getElementById('soundBtn');
   const ambient = (() => {
-    const LEVELS = { day: { birds: 1, workshop: 0.35, crickets: 0 }, night: { birds: 0, workshop: 0.35, crickets: 1 } };
+    const LEVELS = { day: { birds: 1, workshop: 0.4, crickets: 0 }, night: { birds: 0, workshop: 0.4, crickets: 1 } };
+    const NAMES = ['birds', 'workshop', 'crickets'];
     const tracks = {};
-    let on = false, mode = 'day', raf = 0;
+    let on = false, mode = 'day', raf = 0, stopTimer = 0;
+    // на iPhone громкость <audio> менять нельзя, там просто включаем и выключаем дорожки
+    const fixedVolume = (() => { try { const a = new Audio(); a.volume = 0.5; return a.volume !== 0.5; } catch (e) { return true; } })();
     function track(name) {
-      if (!tracks[name]) { const a = new Audio(`audio/${name}.mp3`); a.loop = true; a.preload = 'none'; a.volume = 0; tracks[name] = { a, target: 0 }; }
+      if (!tracks[name]) { const a = new Audio(`audio/${name}.mp3`); a.loop = true; a.preload = 'none'; a.volume = fixedVolume ? 1 : 0; tracks[name] = { a, target: 0 }; }
       return tracks[name];
     }
     function tick() {
@@ -549,12 +552,20 @@
       raf = busy ? requestAnimationFrame(tick) : 0;
     }
     function apply() {
+      clearTimeout(stopTimer);
       const lv = on ? LEVELS[mode] : { birds: 0, workshop: 0, crickets: 0 };
-      for (const name of ['birds', 'workshop', 'crickets']) {
+      for (const name of NAMES) {
         const t = track(name); t.target = lv[name];
-        if (t.target > 0 && t.a.paused) { t.a.play().catch(() => {}); }
+        if (fixedVolume) {
+          if (t.target > 0) { if (t.a.paused) t.a.play().catch(() => {}); }
+          else if (!t.a.paused) t.a.pause();
+        } else if (t.target > 0 && t.a.paused) { t.a.play().catch(() => {}); }
       }
-      if (!raf) raf = requestAnimationFrame(tick);
+      if (!fixedVolume) {
+        if (!raf) raf = requestAnimationFrame(tick);
+        // страховка: через секунду всё, что должно молчать, точно на паузе
+        stopTimer = setTimeout(() => { for (const name of NAMES) { const t = tracks[name]; if (t && t.target === 0 && !t.a.paused) { t.a.pause(); t.a.volume = 0; } } }, 1000);
+      }
     }
     return {
       start: (theme) => { on = true; mode = theme; apply(); },
@@ -563,7 +574,8 @@
       setMode: (t) => { mode = t; if (on) apply(); },
       state: () => (on ? 'running' : 'off'),
       level: () => Object.values(tracks).reduce((s, t) => s + (t.a.paused ? 0 : t.a.volume), 0),
-      resume: () => { if (on) apply(); }
+      resume: () => { if (on) apply(); },
+      playing: () => NAMES.filter((n) => tracks[n] && !tracks[n].a.paused)
     };
   })();
   if (soundBtn) {
