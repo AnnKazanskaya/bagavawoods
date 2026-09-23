@@ -739,3 +739,15 @@ html.is-loading, html.is-locked { overflow: hidden; }
 :root[data-theme="night"] .sound.is-on { color: var(--accent); border-color: var(--accent); }
 .modal__origin { margin-top: -8px; color: var(--ink-2); }
 .modal__origin::before { content: ""; display: inline-block; width: 14px; height: 1px; background: currentColor; margin-right: 8px; vertical-align: middle; }
+/* телефон: шапка с кнопкой звука */
+@media (max-width: 600px) {
+  .header { gap: 10px; padding: 10px 12px; }
+  .logo__text { display: none; }
+  .header__right { gap: 8px; }
+  .toggle__track { width: 70px; height: 34px; padding: 0 8px; }
+  .toggle__knob { width: 26px; height: 26px; top: 2px; left: 2px; }
+  :root[data-theme="night"] .toggle__knob { transform: translateX(36px); }
+  .burger { padding: 0 10px; height: 36px; }
+  .burger__txt { display: none; }
+  .sound { height: 36px; }
+}
